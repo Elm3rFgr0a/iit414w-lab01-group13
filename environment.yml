@@ -1,0 +1,19 @@
+name: iit414w
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  - jupyterlab=4.1
+  - numpy=1.26
+  - pandas=2.2
+  - scikit-learn=1.4
+  - matplotlib=3.8
+  - seaborn=0.13
+  - requests=2.31
+  - pip=24.0
+
+  - pip:
+      - fastf1==3.3.9
+      - ipykernel==6.29

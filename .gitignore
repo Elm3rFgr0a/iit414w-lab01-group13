@@ -1,0 +1,42 @@
+# ── FastF1 data cache ─────────────────────────────────────────────
+data/fastf1_cache/
+fastf1_cache/
+*.ff1pkl
+
+# ── Downloaded / generated data files ────────────────────────────
+data/
+*.csv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.json.gz
+
+# ── Jupyter artifacts ─────────────────────────────────────────────
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*_out.ipynb
+
+# ── Python cache ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ── Conda / pip environment artifacts ─────────────────────────────
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── OS artifacts ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE / editor artifacts ────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
