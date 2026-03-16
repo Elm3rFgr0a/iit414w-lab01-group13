@@ -1,4 +1,4 @@
-# iit414w-lab00 — Reproducibility Runbook
+# iit414w-lab01-group13 - Reproducibility Runbook
 
 | Field | Value |
 |---|---|
@@ -25,8 +25,8 @@ Follow these steps in order. Commands are written for **Anaconda Prompt** or any
 
 **1. Clone the repository (if you haven't already)**
 ```bash
-git clone https://github.com/Elm3rFgr0a/iit414w-lab00-Elm3rFgr0a.git
-cd iit414w-lab00-Elm3rFgr0a
+git clone https://github.com/Elm3rFgr0a/iit414w-lab01-group13
+cd iit414w-lab01-group13
 ```
 
 **2. Create the conda environment from the provided file**
@@ -52,3 +52,19 @@ jupyter lab
 ```
 
 ---
+
+## Run the notebooks with this environment
+
+Use the same activated environment (`iit414w`) to run both notebooks:
+
+```bash
+conda activate iit414w
+jupyter lab baseline.ipynb eda.ipynb
+```
+
+Then run the notebook cells in order:
+
+1. Open `eda.ipynb` and execute all cells (`Run All`).
+2. Open  `baseline.ipynb` and execute all cells (`Run All`).
+
+If Jupyter asks for a kernel, select **Python (iit414w)**.
