@@ -42,3 +42,5 @@ desktop.ini
 *.swo
 
 exit/
+
+.venv/
