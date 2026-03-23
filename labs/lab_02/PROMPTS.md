@@ -1,44 +1,37 @@
-## Entry 1 — 2026-03-15 — Target balance check for `top10`
+# PROMPTS Log
 
-**Context:** We needed to verify whether the target variable (`top10`) was balanced before choosing baseline metrics and evaluation strategy.
-**Prompt(s):** "Using `df` from `results_2022_2024_clean.csv`, generate code to evaluate class balance for `top10` overall and by season (2022, 2023, 2024). Include a countplot and a season-wise barplot, then provide a short decision-oriented interpretation."
-**Output:** The AI produced plotting code with `sns.countplot(x='top10', data=df)` and `season_rate = df.groupby('season')['top10'].mean()`, then a barplot by season. The interpretation concluded `top10` is near 50/50 overall and stable across seasons.
-**Validation:** We executed the cells and confirmed the proportions are approximately 0.50 each season (2022 = 0.50, 2023 = 0.50, 2024 = 0.51). Visual checks matched the numeric summary.
-**Adaptations:** We kept the decision framing (Question -> Data -> Answer -> Decision) and clarified that accuracy alone is insufficient even with balanced classes.
-**Final Decision:** Used — the output matched the dataset and directly supported the baseline evaluation plan.
+## Entry 1 — 2026-03-22 — Feature Engineering (Cell 5)
 
-## Entry 2 — 2026-03-15 — Grid position vs Top-10 + survivorship trap check
+**Context:** We needed to engineer features from domain knowledge (lag, rolling, categorical) without data leakage.
+**Prompt(s):** "Create code to add `constructor_tier` mapped from team names (Mercedes/RB=1, etc), a lag feature `prev_race_position` using shift(1), and a rolling feature `avg_pos_last_3` ensuring no current race data is used. Explain the leakage prevention."
+**Output:** The AI provided pandas code grouping by driver, using `.shift(1)` for the lag feature, and `.shift(1).rolling(3)` for the rolling average to strictly exclude the current race. It also included a dictionary for constructor tiers.
+**Validation:** We verified the `.shift(1)` logic correctly introduces NaNs for the first race (handled by filling with `grid`) and that the rolling window does not include variable `position` from the current row.
+**Adaptations:** We adjusted the tier dictionary slightly to better reflect 2021/2022 performance tiers (e.g., putting Ferrari in Tier 1).
+**Final Decision:** Used — the code correctly implements the features while passing the leakage guard checklist.
 
-**Context:** We wanted to test whether starting grid predicts Top-10, while explicitly checking survivorship bias from filtering only finishers.
-**Prompt(s):** "Create EDA code to compare `grid` distributions for `top10` vs non-`top10` using a boxplot and Spearman correlation. Then add a trap check comparing correlation on all rows vs only `finished==True`, and explain the bias risk."
-**Output:** The AI returned code for a boxplot (`sns.boxplot(x='top10', y='grid', data=df)`), Spearman correlation, and a second calculation on `finished_df`. The written answer reported a negative association and a weaker correlation after finishers-only filtering.
-**Validation:** We verified signs and magnitudes from execution: Spearman is negative for all rows (about `-0.559`) and slightly weaker for finishers-only (about `-0.527`). This confirmed the trap-check narrative.
-**Adaptations:** We emphasized that DNFs are informative and should not be removed without justification; we retained `finished` as a cautionary variable in interpretation.
-**Final Decision:** Used — output was correct and aligned with the course requirement to identify analytical traps.
+## Entry 2 — 2026-03-22 — Model Training (Cell 7)
 
-## Entry 3 — 2026-03-15 — Temporal stability (2022 vs 2024)
+**Context:** We needed to train a simple, interpretable model to beat the Lab 1 baseline.
+**Prompt(s):** "Train a Decision Tree Classifier on the engineered features (`grid`, `constructor_tier`, `prev_race_position`, `avg_pos_last_3`). Use a temporal split (Train=2022, Val=2023). Set `max_depth=5` to prevent overfitting and `random_state=414` for reproducibility."
+**Output:** The AI generated code to split the data temporally, initialize `DecisionTreeClassifier`, fit it on the 2022 training set, and predict on the 2023 validation set.
+**Validation:** We inspected the shapes of `X_train` and `X_val` to ensure the split guideline was followed and confirmed the model fit without errors.
+**Adaptations:** None needed; the parameters were exactly as requested.
+**Final Decision:** Used — this provided the core model for Lab 2 validation.
 
-**Context:** We needed to evaluate whether feature/target behavior shifted across seasons, to justify temporal train/validation/test strategy.
-**Prompt(s):** "Write code to compare 2022 vs 2024 for `top10` rate and `grid` distribution using a barplot and boxplot. Provide a decision-oriented conclusion about covariate shift and model validation design."
-**Output:** The AI generated filtering logic `df[df['season'].isin([2022,2024])]`, a season barplot for Top-10 rate, and a season boxplot for grid. The conclusion stated rates are similar with minor shifts, suggesting no severe drift but recommending monitoring.
-**Validation:** We checked that the plots showed similar Top-10 proportions between seasons and only small distribution differences in grid.
-**Adaptations:** We linked the conclusion directly to process decisions: keep chronological split and monitor drift/recalibration on newer seasons.
-**Final Decision:** Used — the analysis was consistent with temporal evaluation best practice for this dataset.
+## Entry 3 — 2026-03-22 — Evaluation Metrics (Cell 8)
 
-## Entry 4 — 2026-03-15 — Feature-target correlation screening
+**Context:** We needed a comprehensive comparison of the new model against the Lab 1 baselines (Majority Class and Domain Heuristic).
+**Prompt(s):** "Calculate Accuracy, Precision, Recall, F1, and ROC-AUC for: 1) Majority Class, 2) Lab 1 Heuristic (grid<=10), and 3) The new Decision Tree. Print them in a formatted comparison table."
+**Output:** The AI produced a script using `sklearn.metrics` to compute all five metrics for the three approaches and printed a clean markdown-compatible text table.
+**Validation:** We ran the cell and checked that the Majority Class baseline had ~0.5 accuracy/0.0 F1 and the Heuristic baseline matched the Lab 1 report (~0.73 F1), confirming the metric calculations were correct.
+**Adaptations:** Integrated the provided code directly into the notebook to replace the placeholder evaluation.
+**Final Decision:** Used — this table became the basis for `comparison_table.md`.
 
-**Context:** We wanted a quick ranking of candidate variables associated with `top10` before formal modeling, while acknowledging temporal leakage risks.
-**Prompt(s):** "Compute Spearman correlations between `top10` and candidate features (`grid`, `position`, `points`, `laps`, `finished`). Return a compact table with correlation and p-values, plus interpretation of direction and practical caution."
-**Output:** The AI returned a loop-based correlation table using `spearmanr`, including boolean handling for `finished`. The interpretation identified stronger associations for `grid`, `position`, `points`, and `finished`.
-**Validation:** We executed the table and confirmed sensible signs (e.g., lower `grid`/`position` associated with higher Top-10 probability).
-**Adaptations:** We explicitly tagged `position`, `points`, and `finished` as potentially post-race/leakage-sensitive for pre-race prediction tasks.
-**Final Decision:** Partially used — statistical associations were useful, but feature inclusion was filtered by temporal availability rules.
+## Entry 4 — 2026-03-22 — Error Analysis (Cell 10)
 
-## Entry 5 — 2026-03-15 — Data quality audit (missingness, types, outliers)
-
-**Context:** We needed a structured data-quality section (missingness classification, type issues, outliers) and a modeling-safe feature availability decision.
-**Prompt(s):** "Generate a data quality audit for `grid`, `status`, and `points`: show dtypes, missing counts/percentages, outlier check for `points`, and classify likely missingness mechanisms (MCAR/MAR/MNAR). Also separate pre-race vs post-race fields for leakage control."
-**Output:** The AI produced `dq` summary code (`dtype`, `missing_count`, `missing_pct`), a boxplot for `points`, and lists of pre-race vs post-race columns. The narrative flagged MAR/MNAR risk in outcome-related fields and warned against post-race leakage.
-**Validation:** We reviewed execution outputs and cross-checked with the cleaned dataset profile: no duplicates, no NA in key cleaned fields, but quality concerns remained (e.g., invalid `grid=0` rows, mixed categorical semantics in `status`/`positionText`, and high-end `points` outliers).
-**Adaptations:** We converted generic missingness commentary into actionable decisions used in `DATA_QUALITY_LOG.md` and explicitly documented feature-time availability constraints.
-**Final Decision:** Used — the output became the base for the final data quality log and pre-race feature policy.
+**Context:** We needed to understand *why* the model makes mistakes to guide future improvements.
+**Prompt(s):** "Identify False Positives and False Negatives from the validation predictions. Print the top 5 examples of each, showing race, driver, grid, and finished status. specifically check how many False Positives were DNFs (Did Not Finish)."
+**Output:** The code created `fp` and `fn` dataframes by filtering the validation set and calculated the percentage of False Positives that were DNFs.
+**Validation:** The output revealed that a significant portion of False Positives were indeed DNFs (crashes/engine failures), which accurate pre-race features cannot easily predict.
+**Adaptations:** Added print statements to explicitly label these "Failure Modes" for the report.
+**Final Decision:** Used — this analysis provided the "Failure Modes" section of the notebook.
